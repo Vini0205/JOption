@@ -1,0 +1,196 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
+ */
+package javaapplication4;
+
+import java.util.ArrayList;
+import javax.swing.JOptionPane;
+
+/**
+ *
+ * @author Vine
+ */
+public class JavaApplication4 {
+
+    /**
+     * @param args the command line arguments
+     */
+
+    public static void main(String[] args) {
+        System.out.println("Hello, welcome to D/Furious!");
+
+        while (true) {
+            boolean continueShopping = order();
+            if (!continueShopping) {
+                System.out.println("Thank you for visiting!");
+                break;
+            }
+        }
+    }
+
+    public static boolean order() {
+        double total = 0;
+        double paymentGiven = 0;
+        double remainingAmount;
+        String again = null;
+
+        ArrayList<String> orderedItems = new ArrayList<>();
+        ArrayList<Integer> orderedQuantities = new ArrayList<>();
+        ArrayList<Double> orderedPrices = new ArrayList<>();
+
+        double[] prices = {3.50, 3.87, 3.39, 4.79, 5.73, 7.28, 12.50};
+        String[] items = {
+            "Ford Mustang",
+            "Honda Civic Type R",
+            "Jeep Wrangler",
+            "BMW M Series",
+            "Land Cruiser",
+            "Porsche 911 Carrera S",
+            "Nissan GT-R"
+        };
+
+        do {
+            String menu = "       Hello, welcome to D/Furious!\n" +
+                          "Select a car model:\n" +
+                          "F - Ford Mustang............................$3.50\n" +
+                          "H - Honda Civic Type R.................$3.87\n" +
+                          "J - Jeep Wrangler.........................$3.39\n" +
+                          "B - BMW M Series.........................$4.79\n" +
+                          "L - Land Cruiser.............................$5.73\n" +
+                          "P - Porsche 911 Carrera S..........$7.28\n" +
+                          "N - Nissan GT-R............................$12.50\n" +
+                          "E - EXIT\n" +
+                          "Choose a letter (F–N) or E to exit:";
+           
+            String input = JOptionPane.showInputDialog(menu);
+
+            if (input == null || input.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Invalid input! Please try again.");
+                continue;
+            }
+
+            input = input.toUpperCase();
+
+            int choice = switch (input) {
+                case "F" -> 0;
+                case "H" -> 1;
+                case "J" -> 2;
+                case "B" -> 3;
+                case "L" -> 4;
+                case "P" -> 5;
+                case "N" -> 6;
+                case "E" -> -1;
+                default -> -2;
+            };
+
+            if (choice == -1) {
+                return false;
+            } else if (choice == -2) {
+                JOptionPane.showMessageDialog(null, "Invalid choice. Please try again.");
+                continue;
+            }
+
+           
+            String qtyInput = JOptionPane.showInputDialog("You chose: " + items[choice] +
+                                                          "\nHow many do you want to purchase?");
+            int quantity;
+            try {
+                quantity = Integer.parseInt(qtyInput);
+                if (quantity <= 0) throw new NumberFormatException(); // Prevent invalid quantities
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(null, "Invalid quantity! Please enter a positive number.");
+                continue;
+            }
+
+           
+            orderedItems.add(items[choice]);
+            orderedQuantities.add(quantity);
+            double itemTotal = prices[choice] * quantity;
+            orderedPrices.add(itemTotal);
+            total += itemTotal;
+
+            JOptionPane.showMessageDialog(null, "Total up to this point: $" + String.format("%.2f", total));
+
+            again = JOptionPane.showInputDialog("Would you like to purchase more? (Y-Yes / N-No):");
+
+        } while (again != null && again.equalsIgnoreCase("Y"));
+
+       
+        double discount = 0;
+        if (total >= 700) {
+            discount = total * 0.05;
+            total -= discount;
+            JOptionPane.showMessageDialog(null, "Discount applied: $" + String.format("%.2f", discount));
+        }
+
+        remainingAmount = total;
+        boolean paymentSuccessful = false;
+
+       
+        for (int attempts = 0; attempts < 3; attempts++) {
+            String payInput = JOptionPane.showInputDialog("Total that needs to be paid: $" + String.format("%.2f", remainingAmount) +
+                                                          "\nInput the amount of payment:");
+
+            if (payInput == null || payInput.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Invalid input! Please try again.");
+                continue;
+            }
+
+            double pay;
+            try {
+                pay = Double.parseDouble(payInput);
+                if (pay <= 0) throw new NumberFormatException();
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(null, "Not enough payment.Please provide more money.");
+                continue;
+            }
+
+            paymentGiven += pay;
+
+            if (paymentGiven < remainingAmount) {
+                remainingAmount -= pay;
+                JOptionPane.showMessageDialog(null, "Insufficient payment. Remaining balance: $" +
+                                              String.format("%.2f", remainingAmount));
+            } else {
+                double change = paymentGiven - total;
+                JOptionPane.showMessageDialog(null, "Payment complited!\n" +
+                        "Your change: $" +
+                                              String.format("%.2f", change));
+                paymentSuccessful = true;
+                break;
+            }
+        }
+
+        if (!paymentSuccessful) {
+            JOptionPane.showMessageDialog(null, "Payment failed after 3 attempts. Order canceled.");
+            return true;
+        }
+
+        // Generate receipt
+        StringBuilder receipt = new StringBuilder("                               !!D/FURIOUS!! \n\n");
+        receipt.append("**************************************************************\n");
+        receipt.append("                               CASH RECEIP\n");
+        receipt.append("**************************************************************\n");
+        receipt.append("DESCRIPTION: \n\n");
+        for (int i = 0; i < orderedItems.size(); i++) {
+            receipt.append(orderedItems.get(i)).append(" x").append(orderedQuantities.get(i))
+                   .append(" = $").append(String.format("%.2f", orderedPrices.get(i))).append("\n");
+        }
+        if (discount > 0) receipt.append("Discount: $").append(String.format("%.2f", discount)).append("\n");
+        receipt.append("**************************************************************\n");
+        receipt.append("    TOTAL: $").append(String.format("%.2f", total)).append("\n");
+        receipt.append("      Payment: $").append(String.format("%.2f", paymentGiven)).append("\n");
+        double totalchange;
+         receipt.append("      Change: $").append(String.format("%.2f", totalchange = paymentGiven - total)).append("\n");
+         receipt.append("*************************************************************\n\n");
+         receipt.append("        Thank you for your purchase, Drive safely!");
+
+        JOptionPane.showMessageDialog(null, receipt.toString());
+        return true;
+    }
+}
+   
+
+   
+
